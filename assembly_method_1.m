@@ -5,9 +5,9 @@ tic
 
 
 
-%% Main code
-
+% Main code
 %Importing data
+
 T1 = readtable('co2datac','ReadVariableNames',false);
 T2 = readtable('waterdatac','ReadVariableNames',false);
 
