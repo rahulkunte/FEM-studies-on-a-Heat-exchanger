@@ -1,0 +1,170 @@
+%% 8MPA
+clc
+
+Tci2 = 1;
+Tci1 = 300;
+n = input('Enter no. of Elements : ');
+
+L1 = 0.5;
+K = 390;
+L = L1/n;
+x = 0.1;
+di = 0.00773;
+t  = 0.001;
+do = di+2*t;
+do_c= (0.016+do)/2;
+
+hh = 1819.3;
+hhl = hh;
+hhr = 1550;
+hc = 10000;
+mh = 0.01056;%const
+% mc = 0.01;
+% mc = 0.02;
+% mc = 0.04;
+mc = 0.06;
+% mc = 0.16;
+% mc = 0.12;
+% mc = 0.32;
+Ch = 2081;
+Cc = 4187;
+Ph = pi*di;
+Pc = pi*do_c;
+Ah = Ph*L;
+Ac = Pc*L;
+A1 = (hh*Ph)/(mh*Ch);
+A2 = (hc*Pc)/(mc*Cc);
+
+Th = zeros(n+1,1);
+Tc = zeros(n+1,1);
+Tw = zeros(n,1);
+
+
+
+
+
+%% For Cp in J/g-K - Gaussian 8 terms
+
+       a1 =       14.72 ;
+       b1 =       307.8 ;
+       c1 =      0.5701 ;
+       a2 =       5.192  ;
+       b2 =         308  ;
+       c2 =       3.166  ;
+       a3 =       10.35 ;
+       b3 =       307.9  ;
+       c3 =       1.321 ;
+       a4 =       2.369  ;
+       b4 =       308.3 ;
+       c4 =       8.097 ;
+       a5 =    -0.03906 ;
+       b5 =         288 ;
+       c5 =       6.831 ;
+       a6 =      -7.511 ;
+       b6 =       327.6 ;
+       c6 =       44.79  ;
+       a7 =      -1.171 ;
+       b7 =       281.4 ;
+       c7 =       20.44 ;
+       a8 =       9.902  ;
+       b8 =       319.7 ;
+       c8 =       56.01  ;
+
+%% For h in W/m^2-K - Gaussian 6 terms
+
+       a11 =        2804;
+       b11 =       308.2;
+       c11 =      0.5097;
+       a22 =        2182;
+       b22 =       308.9;
+       c22 =      0.9867;
+       a33 =        4058;
+       b33 =       310.1;
+       c33 =       2.452;
+       a44 =        1284;
+       b44 =       332.7;
+       c44 =       9.453;
+       a55 =        -690;
+       b55 =       302.5;
+       c55 =       2.437;
+       a66 =        4100;
+       b66 =       311.6;
+       c66 =       11.73;
+%%
+
+while(Tci2~=280)
+    
+Tci = Tci1;
+Thi = 330;
+Th(1,1) = Thi;
+Tc(1,1) = Tci;
+
+for i=1:n
+       
+%     if (Thi) < (309.5) && (Thi) > (306.5)
+%         
+%         Cph(i) = aa1*exp(-((Th(i)-bb1)/cc1)^2) + aa2*exp(-((Th(i)-bb2)/cc2)^2) + aa3*exp(-((Th(i)-bb3)/cc3)^2) + aa4*exp(-((Th(i)-bb4)/cc4)^2) + aa5*exp(-((Th(i)-bb5)/cc5)^2) + aa6*exp(-((Th(i)-bb6)/cc6)^2) + aa7*exp(-((Th(i)-bb7)/cc7)^2) + aa8*exp(-((Th(i)-bb8)/cc8)^2);
+%         Ch = Cph(i)*1000;
+%         
+%     else
+        Cph(i) = a1*exp(-((Th(i)-b1)/c1)^2) + a2*exp(-((Th(i)-b2)/c2)^2) + a3*exp(-((Th(i)-b3)/c3)^2) + a4*exp(-((Th(i)-b4)/c4)^2) + a5*exp(-((Th(i)-b5)/c5)^2) + a6*exp(-((Th(i)-b6)/c6)^2) + a7*exp(-((Th(i)-b7)/c7)^2) + a8*exp(-((Th(i)-b8)/c8)^2);
+        Ch = Cph(i)*1000;
+        
+%     end
+
+if Th(i) < 334.6717 && Th(i) > 303.0034    
+
+% For h in W/m^2-K
+    h(i) = a11*exp(-((Th(i)-b11)/c11)^2) + a22*exp(-((Th(i)-b22)/c22)^2) + a33*exp(-((Th(i)-b33)/c33)^2) + a44*exp(-((Th(i)-b44)/c44)^2) + a55*exp(-((Th(i)-b55)/c55)^2) + a66*exp(-((Th(i)-b66)/c66)^2);
+    hh = h(i);
+    
+elseif Th(i) > 334.6717  
+    
+    h(i) = hhl;
+    hh = h(i);
+    
+else
+
+     h(i) = hhr;
+     hh = h(i);
+    
+end
+
+
+    A1 = (hh*Ph)/(mh*Ch);
+    
+
+   K_mat = [(1/2 - (A2*L)/6) ((A2*L)/3) 0 (- (A2*L)/3 - 1/2) ((A2*L)/6) 0;
+         0 0 0 1 0 0;
+         ((L*hc)/(6*t)) ((K*(x/L - 1))/L - K/L - (L*(2*hc + 2*hh))/(6*t)) ((L*hh)/(3*t)) ((L*hc)/(3*t)) (K/L - (K*(x/L - 1))/L - (L*(hc + hh))/(6*t)) ((L*hh)/(6*t));
+         ((L*hc)/(3*t)) (K/L - (L*(hc + hh))/(6*t) - (K*x)/L^2) ((L*hh)/(6*t)) ((L*hc)/(6*t)) ((K*x)/L^2 - (L*(2*hc + 2*hh))/(6*t) - K/L) ((L*hh)/(3*t));
+         0 0 1 0 0 0;
+         0 (-(A1*L)/6) ((A1*L)/6 - 1/2) 0 (-(A1*L)/3) ((A1*L)/3 + 1/2)];
+
+ 
+   f = zeros(6,1);
+    f (5,1) = Thi;
+    f (2,1) = Tci;
+    T = K_mat\f;
+
+    Th(i+1,1) = T(6,1);
+    Tc(i+1,1) = T(1,1);
+    
+    Tw(i,1) = (T(2)+T(5))/2;
+
+
+    Tci = T(1,1);
+    Thi = T(6,1);
+    Tci2 = Tci;
+    
+end
+delta_T = abs(Tci2-280);
+if delta_T<0.00001
+        break;
+elseif Tci2>280
+    Tci1 = Tci1-delta_T;
+else
+    Tci1 = Tci1+delta_T;
+end
+
+end
